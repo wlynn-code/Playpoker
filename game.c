@@ -5,33 +5,19 @@
 
 const char* cardtype[ ] = _HANDCARDS_TYPE;
 const char* suitname[ ] = {"HEARTS", "SPADES", "DIAMONDS", "CLUBS"};
-const char* pointname[ ] = { " ",  'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K',}
+const char* pointname[ ] = { " ",  'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'}
 
 
 void init_poker( Card poker[ ])
 {
 	int i = 0, suit = 0, point = 0;
 	for(i = suit; suit < 4; suit++){
-		for(point = 1; point <= 13; point++){
+		for(point = 2; point <= 14; point++){
 			poker[i].suit = suit;
 			poker[i].point = point;
 			i++;
 		}
 	}	
-}
-
-int init_game(Card poker[ ]){
-	int people_num;
-	char *people_name;
-	init_poker(poker);
-	printf("\nFirst step:\n\tPlese input how many people to play : \n");
-	printf("\nHelp:\n");
-	printf("\tinput 1: play with computer \n");
-	printf("\tinput 2 or 3 or ... : play with others\n");
-	scanf("%d", &people_num);
-	printf("Next step:\n\tPlese input your name:\n");
-	scanf("%s", &people_name);
-	return people_num;
 }
 
 void swap(Card *p, Card *q)
@@ -40,52 +26,83 @@ void swap(Card *p, Card *q)
 	*p = *q;
 	*q = t;
 }
+
+
+
+int init_game(Card poker[ ], Player plst_arr[ ]){
+	int people_num=0, i =0;
+	char people_name[20];
+	init_poker(poker);
+	printf("\nFirst step:\n\tPlese input how many people to play : \n");
+	printf("\nHelp:\n");
+	printf("\tinput 1: play with computer \n");
+	printf("\tinput 2 or 3 or ... : play with others\n");
+	scanf("%d", &people_num);
+	for(i = 0; i < people_num; i++){ 
+		printf("Second step:\n\tPlese input your name:\n");
+		scanf("%s", &people_name);
+		plst_arr[i].name = &people_name;
+	}
+	return people_num;
+}
+
 void shuffle_poker(Card poker[ ])
 {
 	int i = 0;
-	for(i = 0; i  < 200; i++){
+	for(i = 0; i  < 500; i++){
 		srand(time(NULL));
 		swap( &poker[rand( )%52], &poker[rand( )%52]);
 	}
 }
 
-void deal(Card poker[ ], Player *p, Player *q)
+void give_money(Player *p, int money)
+{
+	p->balance -= money;
+}
+
+void get_money(Player *p, int money)
+{
+	p->balance += money;
+}
+
+void deal2(Card poker[ ], Player *p, Player *q)
 {
 	int i = 0;
 	for(i = 0; i < 3; i++){
-		p -> handcards[i] = poker[ 2*i];
-		q -> handcards[i] = poker[2*i+1]; 
+		p->handcards[i] = poker[ 2*i];
+		q->handcards[i] = poker[2*i+1]; 
 	}
 }
 
 void sort(Card handcards[ ])
 {
-	if(handcards[0].point < handcards[1].point)
+	if(handcards[0].point > handcards[1].point)
 		swap(&handcards[0], &handcards[1]);
-	if(handcards[0].point< handcards[2].point)
+	if(handcards[0].point> handcards[2].point)
 		swap(&handcards[0], &handcards[2]);
-	if(handcards[1].point < handcards[2].point)
+	if(handcards[1].point > handcards[2].point)
 		swap(&handcards[1], &handcards[2]);
-	if(handcards[2].point == 1 ) {
-		if ((handcards[1].point  !=2) ||( handcards[0].point != 3)){
-			swap(handcards[0],handcards[1]);
-			swap(handcards[0],handcards[2]);
-		}
+	if(handcards[1].point = handcards[2].point)      //PAIR
+		swap(&handcards[0], &handcards[2]);
+	if((handcards[0].point == 2)  && (handcards[1] = 3) && (handcards[2] = 14)) {   //pl.  23A -> A23
+		swap(handcards[1],handcards[2]);
+		swap(handcards[0],handcards[1]);
 	}
+	if(handcards[2] = 14)
+		swap(handcards[0],handcards[2]);
 }
 
 int  judge_type(Card handcards[ ])
 {
 	if((handcards[0].point =2) && (handcards[1].point = 3) && (handcards[2].point = 5))
 		return SPECIAL;
-	else if((handcards[0].point == handcards[1].point) ||( handcards[1] = handcards[2].point)){
-		if(handcards[0].point == handcards[1].point == handcards[2].point)
+	else if(handcards[0].point == handcards[1].point){
+		if(handcards[1].point == handcards[2].point)
 			return SET;
-		if handcards[1].point == handcards[2].point)
-			swap(&handcards[0], &handcards[1])
-		return PAIR;
+		else
+			return PAIR;
 	}
-	else if((handcards[0].point+1) == (handcards[1].point) == (handcards[2].point -1)){
+	else if(((handcards[0].point+1) == (handcards[1].point) == (handcards[2].point -1)) ||((handcards[0].point == 14) && (handcards[1].point == 2) && (handcards[2].point == 3))){
 		if(handcards[0].suit == handcards[1].suit == handcards[2].suit)
 			return STRAIGHT_FLUSH;
 		else 
@@ -97,6 +114,101 @@ int  judge_type(Card handcards[ ])
 		return SCATTERED;
 }
 
+void show_playercards(Player *p)
+{	
+	int i = 0;
+	int ret =  judge_type(handcards[ ]);
+	printf("%s", p->name);
+	printf("\n%s CARDS:\n", cardtype[ret]);
+	for(i = 0; i < 3; i++){
+		printf("\t %s  %s", suitname[ handcards[0].suit], pointname[handcards[0].point]);
+	}
+	printf("\n");
+}
+
+int compare2(Player *p, Player *q)   //p: people   q:computer
+{
+	int ret = p->type -q->type;
+	if(ret == 6 || ret == -6)     //compare set and speciar cards 
+		return -ret;
+	if(ret != 0)
+		return ret;
+	switch (p->type){
+		case SET:
+		case STRAIGHT_FLUSH:
+		case STRAIGHT:
+			return p->handcards[2].point - q->handcards[2].point;
+		case PAIR:
+			return (p->handcards[0].point - q->handcards[0].point) != 0 ? p->handcards[0].point - q->handcards[0].point : p->handcards[2].point - q->handcards[2].point
+		case FLUSH:
+		case SCATTERED:
+			return (p->handcards[0].point - q->handcards[0].point) != 0 ? p->handcards[0].point - q->handcards[0].point :  \
+				     p->handcards[1].point - q->handcards[1].point) != 0 ? p->handcards[1].point - q->handcards[1].point : p->handcards[2].point - q->handcards[2].point
+	}
+	return 0;
+		
+}
+void play_with_computer(Card poker[], Player *p)
+{
+	Player *winner = NULL;
+	Player computer = {"computer"};
+	int base, money;
+	printf("Third step:\n\t:Plese set money of computer:\n");
+	scanf("%d", &computer.balance);
+	printf("Forth step:\n\t:Plese set money of you:\n");
+	scanf("%d", p->.balance);
+	printf("Last step:\n\t:Plese set the base money\n");
+	scanf("%d", base);
+	printf("Loading...\n[");
+	int i = 0;
+	for(i = 0; i < 40; i++){
+		printf(" ");
+	} 
+	printf(" ]\r[");
+	for(i = 0; i < 41; i++){
+		usleep(50000);
+		printf("=");
+		fflush(stdout);
+	}
+	sleep(2);
+	printf("\n");
+	printf("\n\tGREAT !!! Starting with computer !");
+	char c;
+	do{
+		shuffle_poker(poker);
+		give_money(p, base);
+		give_money(&computer, base);
+		deal2(poker, p, &computer);
+		sort(&computer.handcards);
+		sort(&p->handcards);
+		computer.type = judge_type(&computer.handcards);
+		p->type = judge_type(&p->handcards);
+		show_playercards(p);
+		do{
+			printf("\nPlesase input raise number or input 0 to give up\n");
+			scanf("%d", &money);
+			if(money < base && money != 0)
+				printf("\nIput error,plese retry !");
+		}while(money < base && money != 0);
+		if (money != 0){
+			give_money(p, money);
+			give_money(&computer, money);
+			if(compare2(p, &computer) > 0)
+				winner = p;
+			else
+				winner = &computer;
+		}
+		else
+			winner = &computer;
+		show_playercards(&computer);
+		printf("The winner is:\n\t %s\n", winner->name);
+		get_money(winner,(money+base)*2);
+		printf("Your money:    %d\tComputer's money:    %d", p->balance, computer.balance);
+		printf("Continue?   [Y/N]", computer.balance);
+		scanf("%c", &c);
+	}while(c=='Y'||c=='y');
+	printf("\n\tGAME OVER!  THANKS\n");
+}
 
 
 

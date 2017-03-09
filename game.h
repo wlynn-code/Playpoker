@@ -20,6 +20,7 @@ typedef struct{
 	char name[20];
 	Card handcards[3];
 	int type;
+	int balance;
 }Player;
 
 enum Type{
