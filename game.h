@@ -19,6 +19,7 @@ typedef struct{
 	Card handcards[3];
 	int type;
 	int balance;
+	int fds;
 }Player;
 
 enum Type{

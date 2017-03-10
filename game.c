@@ -32,10 +32,10 @@ void swap(Card *p, Card *q)
 int init_game(Card *poker, Player* plst_arr){
 	int people_num=0, i =0;
 	char people_name[20];
-	printf("\nFirst step:\n\tPlese input how many people to play : \n");
+	printf("\nFirst step:\n\tPlese input  play with computer or others: \n");
 	printf("\nHelp:\n");
 	printf("\tinput 1: play with computer \n");
-	printf("\tinput 2 or 3 or ... : play with others\n");
+	printf("\tinput 2: play with others\n");
 	scanf("%d", &people_num);
 	for(i = 0; i < people_num; i++){ 
 		printf("Second step:\n\tPlese input your name:\n");
@@ -188,7 +188,7 @@ void play_with_computer(Card *poker, Player *p)
 		printf("Handing...\n");
 		sleep(1);
 		shuffle_poker(poker);
-		give_money(p, base);
+		give_money(p, base); 
 		give_money(&computer, base);
 		deal2(poker, p, &computer);
 		sort(&computer.handcards);

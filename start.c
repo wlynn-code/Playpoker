@@ -8,7 +8,9 @@ int main(){
 	switch (pepole_num){
 		case 1:
 			play_with_computer(poker, &plst_arr[0]);
-		break;	
+		break;
+		case 2:
+			play_with_others();
 	}
 	return 0;
 }
