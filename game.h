@@ -2,8 +2,6 @@
 #define GAME_H
 typedef unsigned int  uint;
 
-Card poker[52];
-
 enum Suit {
 	hearts,
 	spades,
@@ -40,8 +38,8 @@ enum Type{
 	"STRAIGHT", \
 	"FLUSH",  \
 	"STRAIGHT FLUSH", \
-	"SET" \..
-	};
+	"SET"  \
+	}
 
 
 
