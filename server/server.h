@@ -7,10 +7,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include "../game/game.h"
 
-Player people_list[100] = {0};
-int sockfd;
-int size = 0;
-char* IP = "127.0.0.1";
-short PORT = 10222;
-typedef struct sockaddr SA;
+
+struct pthst{
+	Card *poker;
+	Player *plist;
+};
+extern void sig_close();

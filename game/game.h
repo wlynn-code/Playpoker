@@ -2,6 +2,7 @@
 #define GAME_H
 typedef unsigned int  uint;
 
+
 enum Suit {
 	hearts,
 	spades,
@@ -41,17 +42,17 @@ enum Type{
 	"STRAIGHT FLUSH", \
 	"SET"  \
 	}
-
-
-
-
-
-
-
-
-
-
-
+extern void init_poker(Card* poker);
+extern void swap(Card *p, Card *q);
+extern void shuffle_poker(Card *poker);
+extern void give_money(Player *p, int money);
+extern void get_money(Player *p, int money);
+extern void deal2(Card *poker, Player *p, Player *q);
+extern void sort(Card *handcards);
+extern void sort_scattered(Card *handcards);
+extern int  judge_type(Card *handcards);
+extern void show_playercards(Player *p);
+extern int compare2(Player *p, Player *q);
 
 
 
