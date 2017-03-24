@@ -1,11 +1,11 @@
 #include "server.h"
 
-Player people_list[100] = {0};
+Player people_list[100];
 int sockfd;
 int size = 0;
 char* IP = "127.0.0.1";
 short PORT = 10222;
-int flag;
+int flag, proflag;
 typedef struct sockaddr SA;
 
 
@@ -70,7 +70,42 @@ void *service_thread(void *p)
     int fd = ((struct pthst*)p)->plist->fds;
     char buf[100] = {};
     char msg[100] = {};
-    do{
+    int i =0;
+     do{
+        people_list[m_id].iscard = 1;
+        while(strcmp(people_list[m_id].name,people_list[0].name) == 0){
+            if((recv(fd, buf, sizeof(buf), 0 ) > 0) && (strncmp(buf, "start", 5) == 0)){
+                send_msg_to_all(buf);
+                shuffle_poker(((struct pthst *)p)->poker);
+                deal2(((struct pthst *)p)->poker, &people_list[0], &people_list[1]);
+                for(i = 0; i < size; i++){
+                    sort(&people_list[i].handcards);
+                    people_list[i].type = judge_type(people_list[i].handcards);
+                    if(people_list[i].type == SCATTERED)
+                        sort_scattered(people_list[i].handcards);
+                }
+                flag = 1;
+                break;
+            }
+        }
+        if(flag == 0){
+            while(1){
+                if(flag == 1){
+                    flag = 0;
+                    break;
+                }
+            }
+        }
+        bzero(msg, 100);
+        printf("\n%s:\n%s CARDS:\n\t %s  %s\t %s  %s\t %s  %s\n",people_list[m_id].name, cardtype[people_list[m_id].type-1],   \
+                 suitname[people_list[m_id].handcards[0].suit],pointname[people_list[m_id].handcards[0].point],suitname[people_list[m_id].handcards[1].suit],  \
+                 pointname[people_list[m_id].handcards[1].point],suitname[people_list[m_id].handcards[2].suit],pointname[people_list[m_id].handcards[2].point]);
+        printf("abc\n");
+        sprintf(msg, "\n%s:\n%s CARDS:\n\t %s  %s\t %s  %s\t %s  %s",people_list[m_id].name, cardtype[people_list[m_id].type-1],   \
+                 suitname[people_list[m_id].handcards[0].suit],pointname[people_list[m_id].handcards[0].point],suitname[people_list[m_id].handcards[1].suit],  \
+                 pointname[people_list[m_id].handcards[1].point],suitname[people_list[m_id].handcards[2].suit],pointname[people_list[m_id].handcards[2].point]);
+        int num = send(people_list[m_id].fds, msg, strlen(msg), 0);
+        printf("num = %d\n", num);
         if(recv(fd, buf, sizeof(buf), 0 ) <= 0){
             int i;
             for(i = 0; i < size; i++){
@@ -83,25 +118,21 @@ void *service_thread(void *p)
             send_msg_to_all(msg);
             return;
         }
-        if(flag == 1){
-            usleep(100000);
+        if(strncmp(buf[0],"0", 1) == 0){
+            bzero(buf,100);
             bzero(msg, 200);
-            sprintf(msg, "\n%s:\n%s CARDS:\n\t %s  %s\t %s  %s\t %s  %s",people_list[m_id].name, people_list[m_id].type,   \
-                     people_list[m_id].handcards[0].suit,people_list[m_id].handcards[0].point,people_list[m_id].handcards[1].suit,  \
-                     people_list[m_id].handcards[1].point,people_list[m_id].handcards[2].suit,people_list[m_id].handcards[2].point);
-            send(people_list[m_id].fds, msg, strlen(msg), 0);
-            recv(fd, buf, sizeof(buf), 0 );
-            if(strncmp(buf[0],"0", 1) == 0){
-                bzero(buf,100);
-                bzero(msg, 200);
-                printf(msg, "\n%s give up the game", people_list[m_id].name);
-                send_msg_to_all(msg);
-                bzero(msg,200);
-                printf(msg,"\nYou lost \n");
-                send(people_list[m_id].fds, msg, strlen(msg), 0);
+            people_list[m_id].iscard == 0;
+            int win;
+            for(i = 0; i < size; i++){
+                if(people_list[i].iscard == 1)
+                    win = i;
             }
-            flag=0;
-        }
+            printf(msg, "\n%s give up the game, %s  win !!!", people_list[m_id].name,people_list[m_id].name);
+            send_msg_to_all(msg);
+            bzero(msg,200);
+            printf(msg,"\nYou lost \n");
+            send(people_list[m_id].fds, msg, strlen(msg), 0);
+            }
     }while((strncmp(buf, "Y", 1) == 0 )||(strncmp(buf, "y", 1) == 0));
     return;
 }
@@ -129,20 +160,6 @@ void service(Card *poker){
         pthp.plist = people_list;
         pthread_t pid;
         pthread_create(&pid , 0, service_thread, &pthp);
-        sleep(1);
-        char buf[10];
-        if((recv(people_list[0].fds, buf, sizeof(buf), 0) > 0) && (strncmp(buf, "start", 5))){
-             send_msg_to_all(buf);
-            flag = 1;
-            shuffle_poker(poker);
-            deal2(poker, &people_list[0], &people_list[1]);
-            for(i = 0; i < size; i++){
-                sort(&people_list[i].handcards);
-                people_list[i].type = judge_type(people_list[i].handcards);
-                if(people_list[i].type == SCATTERED)
-                    sort_scattered(people_list[i].handcards);
-            }
-       }
     }
 }
 

@@ -21,6 +21,7 @@ typedef struct{
 	int type;
 	int balance;
 	int fds;
+         int iscard;
 }Player;
 
 enum Type{
@@ -42,6 +43,9 @@ enum Type{
 	"STRAIGHT FLUSH", \
 	"SET"  \
 	}
+extern const char* cardtype[ ];
+extern const char* suitname[ ];
+extern const char* pointname[ ];
 extern void init_poker(Card* poker);
 extern void swap(Card *p, Card *q);
 extern void shuffle_poker(Card *poker);

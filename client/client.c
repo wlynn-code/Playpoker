@@ -3,7 +3,7 @@
 int sockfd;
 char *IP="127.0.0.1";
 short PORT=10222;
-int flagbuf[100];
+int flag;
 typedef struct sockaddr SA;
 char name[30];
 
@@ -132,8 +132,9 @@ void *recv_thread(void *p)
         if(recv(sockfd, buf, sizeof(buf), 0) <= 0){
             return;
         }
-        strcpy(flagbuf, buf);
         printf("%s\n", buf);
+        if(strncmp(buf, "start", 5) ==0 )
+            flag = 1;
     }
 }
 
@@ -147,6 +148,7 @@ void start(char *name)
     if(recv(sockfd, owner, sizeof(owner), 0) <= 0){
            return;
     }
+    char buf[100];
     printf("%s\n", owner);
     pthread_t pid;
     pthread_create(&pid, 0, recv_thread, 0);
@@ -154,19 +156,25 @@ void start(char *name)
     do{
         if(strncmp(owner, name, 3) == 0){
             printf("You are homeowner,please input start to deal cards !\n");
-            scanf("%s", flagbuf);
-            while(strncmp(flagbuf, "start", 5) != 0){
+            scanf("%s", buf);
+            while(strncmp(buf, "start", 5) != 0){
                 printf("Input error, please retry !\n");
-                bzero(flagbuf,100);
-                scanf("%s", flagbuf);
+                bzero(buf,100);
+                scanf("%s", buf);
             }
-            send(sockfd, flagbuf, strlen(flagbuf), 0);
+            int num = send(sockfd, buf, strlen(buf), 0);
+            printf("sent start num %d\n", num);
         }
-        while(strncmp(flagbuf, "start", 5) != 0);
-        bzero(flagbuf,100);
-        printf("Handing...\n");
+        if(flag ==  0){
+            printf("Wating homeowner to input start...\n");
+            while(1){
+                if(flag == 1){
+                    flag = 0;
+                    break;
+                }
+            }
+        }
         do{
-            sleep(1);
             printf("Plesase input raise number or input 0 to give up\n");
             scanf("%d", &money);
             if(money < base && money != 0)
@@ -198,7 +206,8 @@ void play_with_others(char *name)
 {
     signal(SIGINT, sig_close);
     init_client();
-    send(sockfd, name, strlen(name), 0);
+    int num = send(sockfd, name, strlen(name), 0);
+    printf("send:%d\n", num);
     start(name);
 }
 
