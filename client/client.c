@@ -145,6 +145,7 @@ void start(char *name)
     //scanf("%d", &base);
     printf("\nGame start !!!\n");
     char owner[100] = {};
+    int num;
     if(recv(sockfd, owner, sizeof(owner), 0) <= 0){
            return;
     }
@@ -162,7 +163,7 @@ void start(char *name)
                 bzero(buf,100);
                 scanf("%s", buf);
             }
-            int num = send(sockfd, buf, strlen(buf), 0);
+            num = send(sockfd, buf, sizeof(buf), 0);
             printf("sent start num %d\n", num);
         }
         if(flag ==  0){
@@ -174,13 +175,17 @@ void start(char *name)
                 }
             }
         }
+        sleep(2);
         do{
             printf("Plesase input raise number or input 0 to give up\n");
             scanf("%d", &money);
             if(money < base && money != 0)
                 printf("\nIput error,plese retry !");
         }while(money < base && money != 0);
-        send(sockfd, money, sizeof(money), 0);
+        bzero(buf, 100 );
+        sprintf(buf, "%d", money);
+        num = send(sockfd, buf, sizeof(buf), 0);
+        printf("num = %d\n", num);
         sleep(2);
         printf("Continue?  [Y/N]");
         scanf(" %c", &c);
