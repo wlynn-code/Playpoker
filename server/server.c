@@ -127,18 +127,23 @@ void *service_thread(void *p)
             sprintf(msg, "\n%s give up the game\n", people_list[m_id].name);
             send_msg_to_all(msg);
         }
+        printf("123\n");
         if((people_list[0].iscard == 1) && (people_list[1].iscard == 1)){
             if(compare2(&people_list[0],& people_list[1]) > 0)
                 win = 0;
-            else win = 1;
+            else 
+                win = 1;
         }
+        printf("win = %d\n", win);
+        printf("name = %s\n", people_list[m_id].name);
          if(strcmp(people_list[m_id].name, people_list[win].name) == 0){
+            printf("****");
             bzero(buf, 100);
-            sprintf(buf, "You win !!!\n");
-            send(people_list[m_id].fds, buf, strlen(buf), 0);
+            sprintf(buf, "\nYou win !!!\n");
+            send(people_list[m_id].fds, buf, sizeof(buf), 0);
         }
-        bzero(buf, 100);
          if(strcmp(people_list[m_id].name, people_list[win].name) != 0){
+            bzero(buf, 100);
             sprintf(buf,"\nYou lost  !!!\n");
             send(people_list[m_id].fds, buf, sizeof(buf), 0);
             bzero(msg, 200);
